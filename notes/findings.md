@@ -252,7 +252,7 @@ Every defect above maps to a mandatory normalisation/validation step before any 
 4. **Parse dates explicitly**: ISO and `DD/MM/YYYY`; never `MM/DD`. Attach a timezone assumption to naive carrier/refund timestamps; use tz-aware UTC consistently.
 5. **Parse money** by stripping `USD ` / `$` / commas; treat `Order Total` as line value excluding shipping; compute paid amount per line as `qty × unit_price`.
 6. **Handle missing carrier data**: empty `delivered_at` ⇒ no delivery date; `UNAVAILABLE` ⇒ `CARRIER_STATUS_UNAVAILABLE`; empty `last_event_at` ⇒ cannot assess movement.
-7. **Guard chronology**: clamp/flag negative `last_event_at − shipped_at`; compute lost-in-transit against an explicit `as_of` (ticket `received_at` vs current time).
+7. **Guard chronology**: clamp/flag negative `last_event_at − shipped_at`; compute lost-in-transit against an explicit `as_of` locked to `ticket.received_at`.
 8. **Refund per line**: subtract existing `ISSUED` refunds per `(order_id, line_no)`; cap at unpaid affected-line value; never order-level.
 9. **Dedupe forwarded tickets** (4 in inbox) before proposing refunds; enforce at-most-once per request.
 10. **Schema conformance**: emit only the `TicketResponse` Literals; `approver_role` null unless approval required; include trace and checks.

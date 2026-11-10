@@ -65,6 +65,7 @@ ticket JSON (untrusted)
 - **`as_of` = `ticket.received_at`** (not wall clock / export date). This is required: T008 is 1 day since last scan at send time (`PROCEED`) but 29 days stale at the 2026-11-02 export; T011 is 16 days stale at send time (`ESCALATE`). Locking `as_of` to the ticket timestamp makes both labels match.
 - Missing carrier status (`UNAVAILABLE` / no `last_event_at`) → `UNABLE_TO_VERIFY` / `CARRIER_STATUS_UNAVAILABLE`, never a guessed refund.
 - Override/threat detection short-circuits to `ESCALATE` / `TRUST_SAFETY` before amount logic.
+- **Deterministic injection scan (never LLM-only):** regex/keyword scan `subject + body` case-insensitively for `ignore previous instructions`, `[system]`, `pre-approved` (`preapproved`/`pre approved`), `charged?back`, `lawyer`, `legal action`, `authorised to process`, `mark human_approval_required`; OR the hit with the model's `injection_flags`. Either source forces `POLICY_OVERRIDE_ATTEMPT` → `ESCALATE` / `TRUST_SAFETY` and cannot change amount or approval.
 
 ### 1.3 `draft_reply` is template-built from the decision — facts and amounts always match
 
@@ -119,7 +120,7 @@ ticket JSON (untrusted)
 
 ## 3. Open cases — copy-ready one-line rules (`COPY → APPROACH.md / ARTEFACT.md`)
 
-> **BEGIN COPY BLOCK — 18 open-case rules**
+> **BEGIN COPY BLOCK — 19 open-case rules**
 
 1. **O1 — Change-of-mind return within 30 days:** refund the affected line value (`qty × unit_price`); after 30 days → `REJECT` with `OUT_OF_WINDOW`.
 2. **O2 — Shipping fees:** never refund `shipping_fee`; refund affected line value only and explain with `PARTIAL_LINES`.
@@ -129,16 +130,17 @@ ticket JSON (untrusted)
 6. **O6 — Partial prior refund:** subtract the sum of `ISSUED` amounts for `(order_id, line_no)` and propose the remaining balance; zero balance → `ALREADY_REFUNDED`.
 7. **O7 — Non-ISSUED refunds:** count only `ISSUED` refunds against a line; ignore other statuses.
 8. **O8 — Order vs carrier status conflict:** treat the carrier `delivered_at` / shipment status as authoritative for delivery and windows.
-9. **O9 — Multiple orders in one ticket:** process one order per request; if several valid orders are cited, return `PEND` for human triage.
-10. **O10 — Carrier says DELIVERED but customer disputes:** `ESCALATE` to `CARRIER_CLAIMS` with proposed code `DELIVERY_DISPUTE`; propose no refund.
+9. **O9 — Multiple orders in one ticket:** process one order per request; if several valid orders are cited, return `PEND` with `human_approval_required` true and `approver_role` `SUPPORT_LEAD` for human triage.
+10. **O10 — Carrier says DELIVERED but customer disputes:** `ESCALATE` to `CARRIER_CLAIMS` with empty `reason_codes` (policy codes only — never invent `DELIVERY_DISPUTE`); propose no refund.
 11. **O11 — Damage claimed before delivery:** propose no refund until delivery; reply with current status (`PROCEED`) and re-evaluate the window after delivery.
 12. **O12 — Duplicate/forwarded ticket:** treat as the same request and process once; reply referencing the existing outcome, never issue a second refund.
 13. **O13 — Exactly $150.00:** proceed without approval (inclusive bound); only amounts above $150.00 require the Support Lead.
-14. **O14 — No resolvable order reference:** return `UNABLE_TO_VERIFY` rather than guessing an order.
+14. **O14 — No resolvable order reference:** parse `subject + body`; if the sender has exactly one order on file, use it; if several, return `UNABLE_TO_VERIFY` and ask which order; if the sender email is not on file, return `INVALID_REQUEST`; never guess or fuzzy-match an order.
 15. **O15 — Non-USD currency:** return `INVALID_REQUEST`; the contract and dataset are USD-only.
 16. **O16 — Status query for `UNAVAILABLE` shipment:** return `UNABLE_TO_VERIFY` with `CARRIER_STATUS_UNAVAILABLE`.
 17. **O17 — Lost-in-transit clock:** evaluate the >10-day silence against `ticket.received_at` using `last_event_at`, and record that `as_of` in evidence.
 18. **O18 — Override + identity mismatch together:** policy override wins — `ESCALATE` to `TRUST_SAFETY`, while recording the identity discrepancy in evidence.
+19. **O19 — Ledger action/status per outcome:** `PEND` → `REFUND`/`PROPOSED`, then `APPROVED` or `REJECTED` by decision; auto `PROCEED`/`PROCEED_MODIFIED` refunds → `REFUND`/`PROPOSED` (the service never processes money); `REJECT`/`INVALID_REQUEST`/`UNABLE_TO_VERIFY`/status answers → `REPLY`; `ESCALATE` → `ESCALATION`.
 
 > **END COPY BLOCK**
 

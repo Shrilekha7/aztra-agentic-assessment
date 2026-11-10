@@ -86,6 +86,7 @@ Every check should emit one `CheckResult` from the schema: `PASS`, `FAIL`, `NOT_
 | Condition | Human required | `approver_role` | Clause |
 |---|---|---|---|
 | Refund amount **> $150** per request (before anything is processed) | Yes (`PEND`) | `SUPPORT_LEAD` | RP-3.2 §3.2 |
+| Several valid orders cited in one ticket (O9 human triage) | Yes (`PEND`) | `SUPPORT_LEAD` | RP-3.2 §4.1 (O9) |
 | Shipment with **no carrier movement > 10 days** (lost in transit) | Yes (`ESCALATE`) | `CARRIER_CLAIMS` | RP-3.2 §5.1 |
 | Message attempts policy bypass / threatens chargeback or legal action / claims pre-approval | Yes (`ESCALATE`) | `TRUST_SAFETY` | RP-3.2 §5.2 |
 | Amount ≤ $150, in window, valid identity, no override | No | `null` | RP-3.2 §3.1 |
@@ -118,7 +119,9 @@ First decisive condition wins. See §6 for precedence.
 | 14 | Damaged/faulty, days 31–45, **no photo** | `REJECT` | `OUT_OF_WINDOW` | No | §2.6 |
 | 15 | Damage after 45 days, or wrong/not-as-described after 30 days | `REJECT` | `OUT_OF_WINDOW` | No | §2.6 |
 | 16 | Return/change-of-mind within 30 days (see open case O1) | `PROCEED` (or `PROCEED_MODIFIED`) | *(none)* | No | §2.1, §2.2 |
-| 17 | Non-delivery claim but carrier reports DELIVERED (see O10) | `ESCALATE` | *(no policy code; propose `DELIVERY_DISPUTE`)* | Yes / `CARRIER_CLAIMS` | §4.2, §5.1 (analogy) |
+| 17 | Non-delivery claim but carrier reports DELIVERED (see O10) | `ESCALATE` | *(empty — no policy code; never invent `DELIVERY_DISPUTE`)* | Yes / `CARRIER_CLAIMS` | §4.2, §5.1 (analogy) |
+
+**Deterministic injection detection (does not rely on the LLM):** scan the raw ticket `subject` + `body`, case-insensitively, for at least these tokens/phrases — `ignore previous instructions`, `[system]`, `pre-approved` (also `preapproved`/`pre approved`), `authorised to process`, `mark human_approval_required`, `chargeback`, `lawyer`, `legal action`. OR the deterministic hit with the model's `injection_flags`; either one triggers `CHK_POLICY_OVERRIDE` → `ESCALATE` / `TRUST_SAFETY` (`POLICY_OVERRIDE_ATTEMPT`) and never changes the amount or approval flag. Always parse `subject + body`.
 
 **Worked examples from `eval_seed_labelled.json`** (confirm the table): T001 = row 13 (`PEND`, `DAMAGE_EXCEPTION`+`APPROVAL_REQUIRED`, $210); T003 = row 11 ($185, `PEND`); T004/T005/T006/T002 = row 9; T008 = row 6; T011 = row 5; T013 = row 4; T014 = row 15 (38 days, not-what-I-hoped); T018 = row 8 (prior `ISSUED` refund RF-900); T019 = row 10 (`PROCEED_MODIFIED`, `PARTIAL_LINES`); T020/T021 = row 1; T026 = row 11 with `PRIOR_REFUND` (`ALREADY_REFUNDED`+`APPROVAL_REQUIRED`, $185).
 
@@ -149,16 +152,17 @@ Note: an override attempt (step 1) wins over an otherwise valid refund; an order
 | O6 | Prior refund only partly covers a line | Subtract the sum of `ISSUED` amounts for `(order_id, line_no)` and propose the remaining unpaid balance; zero balance ⇒ `ALREADY_REFUNDED`. |
 | O7 | Prior refund with status other than `ISSUED` | Count only `ISSUED` refunds against the line; ignore other statuses. |
 | O8 | `orders.status` conflicts with carrier status | Treat the carrier `delivered_at`/shipment status as authoritative for delivery and window calculations. |
-| O9 | Ticket references multiple orders | Process a single order per request; if more than one valid order is cited, return `PEND` with no role for human triage. |
-| O10 | Carrier says DELIVERED but customer claims non-receipt | Escalate to `CARRIER_CLAIMS` (proposed code `DELIVERY_DISPUTE`); propose no refund. |
+| O9 | Ticket references multiple orders | Process a single order per request; if more than one valid order is cited, return `PEND` with `human_approval_required: true` and `approver_role` `SUPPORT_LEAD` for human triage. |
+| O10 | Carrier says DELIVERED but customer claims non-receipt | `ESCALATE` to `CARRIER_CLAIMS` with empty `reason_codes`; reason codes must come from `policies/`, so never invent `DELIVERY_DISPUTE`; propose no refund. |
 | O11 | Damaged/faulty claim before delivery (`SHIPPED`/`IN_TRANSIT`) | Propose no refund until delivery; reply with current status (`PROCEED`) and re-evaluate the window after delivery. |
 | O12 | Duplicate or forwarded ticket for the same order/line | Treat as the same request and process once (`CHK_PROCESS_ONCE`); reply by referencing the existing outcome, never issue a second refund. |
 | O13 | Refund amount exactly $150.00 | Proceed without approval (inclusive bound); only amounts above $150.00 require the Support Lead. |
-| O14 | Ticket has no resolvable order reference | Return `UNABLE_TO_VERIFY` (identity/order cannot be established) rather than guessing an order. |
+| O14 | Ticket has no resolvable order reference | Parse **subject + body**. If the sender has exactly one order on file, use it; if several, return `UNABLE_TO_VERIFY` and ask which order; if the sender email is not on file, return `INVALID_REQUEST`. Never guess or fuzzy-match an order. |
 | O15 | Non-USD currency encountered | Return `INVALID_REQUEST`; the contract and dataset are USD-only (`currency` = USD on every order). |
 | O16 | Order-status query for an `UNAVAILABLE` shipment | Return `UNABLE_TO_VERIFY` with `CARRIER_STATUS_UNAVAILABLE`; tell the customer we are checking. |
-| O17 | Lost-in-transit clock at handling time vs ticket time | Evaluate the >10-day silence against handling time using `last_event_at`, and record the `as_of` used in evidence. |
+| O17 | Lost-in-transit clock (`as_of`) | Evaluate the >10-day silence against `ticket.received_at` as `as_of` using `last_event_at`, and record that `as_of` in evidence. |
 | O18 | Override attempt combined with an order/customer mismatch | Policy override takes precedence: `ESCALATE` to `TRUST_SAFETY`, while noting the identity discrepancy in evidence. |
+| O19 | Ledger action/status per outcome | `PEND` → `REFUND`/`PROPOSED`, then `APPROVED` or `REJECTED` by decision; auto `PROCEED`/`PROCEED_MODIFIED` refunds → `REFUND`/`PROPOSED` (the service never processes money); `REJECT`/`INVALID_REQUEST`/`UNABLE_TO_VERIFY`/status answers → `REPLY`; `ESCALATE` → `ESCALATION`. |
 
 ---
 
