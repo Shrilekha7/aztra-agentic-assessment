@@ -20,13 +20,17 @@ from src.contracts import (
     DocumentUsed,
     Evidence,
     LedgerEntry,
+    ModelCall,
     Resolved,
     TicketResponse,
     Trace,
 )
 from src.extract import DEFAULT_EXTRACTOR, ExtractionResult, coerce_ticket
+from src.llm_extract import LLMExtractor
 from src.reply import build_draft_reply
 from src.rules import DecisionResult, evaluate
+
+EXTRACTOR = LLMExtractor()
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
@@ -42,12 +46,26 @@ def _now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
-def _trace(tools: list[str]) -> Trace:
+def _trace(tools: list[str], extraction: ExtractionResult | None = None) -> Trace:
+    model_calls: list[ModelCall] = []
+    cost = 0.0
+    tool_names = list(tools)
+    if extraction is not None:
+        for call in extraction.model_calls:
+            model_calls.append(
+                ModelCall(
+                    model=str(call.get("model") or ""),
+                    input_tokens=int(call.get("input_tokens") or 0),
+                    output_tokens=int(call.get("output_tokens") or 0),
+                )
+            )
+        cost = float(extraction.cost_usd or 0.0)
+        tool_names.extend(extraction.extractor_tools)
     return Trace(
-        model_calls=[],
-        tools_called=list(dict.fromkeys(tools)),
+        model_calls=model_calls,
+        tools_called=list(dict.fromkeys(tool_names)),
         documents_used=[DocumentUsed(document="RP-3.2", version="3.2")],
-        cost_usd=0.0,
+        cost_usd=round(cost, 8),
     )
 
 
@@ -96,7 +114,7 @@ def _assemble_response(
         human_approval_required=decision.human_approval_required,
         approver_role=decision.approver_role,
         draft_reply=reply,
-        trace=_trace(decision.tools_called),
+        trace=_trace(decision.tools_called, extraction),
     )
 
 
@@ -148,7 +166,7 @@ def create_ticket(payload: Any = Body(default=None)) -> TicketResponse:
     extraction: ExtractionResult | None = None
 
     try:
-        extraction = DEFAULT_EXTRACTOR.extract(ticket, data.product_names())
+        extraction = EXTRACTOR.extract(ticket, data.product_names())
         decision = evaluate(ticket, extraction, runtime.existing_refund)
         response = _assemble_response(ticket, extraction, decision, run_id)
         latency_ms = round((time.perf_counter() - started) * 1000, 3)

@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: larkfield-support
+    runtime: python
+    buildCommand: pip install -r requirements.txt && python -m src.prepare
+    startCommand: uvicorn src.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: GROQ_API_KEY
+        sync: false
+      - key: MODEL_ID
+        sync: false

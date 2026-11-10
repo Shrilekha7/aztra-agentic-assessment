@@ -45,6 +45,11 @@ class ExtractionResult:
     has_image_attachment: bool = False
     injection_flags: list[str] = field(default_factory=list)
     injection_detected: bool = False
+    model_calls: list[dict[str, Any]] = field(default_factory=list)
+    cost_usd: float = 0.0
+    llm_used: bool = False
+    llm_fallback: bool = False
+    extractor_tools: list[str] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
