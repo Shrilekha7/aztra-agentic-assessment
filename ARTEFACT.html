@@ -2,12 +2,84 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Artefact</title>
+  <title>Artefact — Larkfield Home support agent</title>
 </head>
 <body>
-  <p>
-    Fill this file with the written deliverable your problem brief asks for (for example, a
-    Reconciliation Report). The grader reads this exact file — do not rename or move it.
-  </p>
+  <h1>Artefact — Larkfield Home support agent</h1>
+
+  <h2>1. What prepare found and did</h2>
+  <p><code>python -m src.prepare</code> reads <code>dataroom/</code> read-only and writes
+  <code>build/larkfield.db</code>, <code>build/prepare_report.json</code> and the cleaned tables.
+  Real counts from the report:</p>
+  <ul>
+    <li>Tables: 53 customers, 47 orders, 57 order items, 3 refunds, 47 shipments, 40 tickets, 3 policy documents, 15 eval labels.</li>
+    <li>Orders: 49 rows in, 47 after dedupe; duplicates <code>LF-100216</code> and <code>LF-100239</code>; raw total $8,031.50 vs deduped $7,536.50, i.e. $495.00 inflation.</li>
+    <li>Money: raw <code>Order Total</code> forms were 17 <code>$</code>-prefixed, 16 <code>USD </code> prefixed and 16 plain; 49 parsed, 0 unparseable; 47 remain after dedupe.</li>
+    <li>Dates: 36 ISO and 13 <code>DD/MM/YYYY</code> order dates; 3 would be ambiguous if read as <code>MM/DD</code>. Naive timestamps were assumed UTC: 47 <code>shipped_at</code>, 34 <code>delivered_at</code>, 44 <code>last_event_at</code>, plus 3 refund timestamps.</li>
+    <li>Emails: 0 customer emails and 8 ticket emails needed <code>strip().lower()</code> (6 support inbox, 2 public).</li>
+    <li>Shipments: 4 rows had <code>last_event_at &lt; shipped_at</code> and were kept with <code>timestamp_anomaly=1</code> (<code>SHP-5010</code>, <code>SHP-5011</code>, <code>SHP-5029</code>, <code>SHP-5039</code>); 13 <code>delivered_at</code> and 3 <code>last_event_at</code> values were empty.</li>
+    <li>Tickets: 4 duplicate-body clusters (<code>T002/T027</code>, <code>T005/T028</code>, <code>T009/T029</code>, <code>T014/T030</code>), 10 attachments all with empty base64, 2 non-existent order references (<code>T022</code> <code>LF-109777</code>, <code>P04</code> <code>LF-116511</code>), 1 owner mismatch (<code>T023</code>), 0 missing references.</li>
+    <li>Referential integrity: 0 orphan order items, shipments, refunds or customers.</li>
+  </ul>
+  <p>The four shipment anomalies are flagged, not repaired, because the carrier feed is the
+  authoritative record. Dedupe, email normalisation, money parsing and UTC date parsing are
+  applied in <a href="src/prepare.py">src/prepare.py</a>.</p>
+
+  <h2>2. Policy used and why</h2>
+  <ul>
+    <li><strong>RP-3.2 v3.2</strong> (effective 2026-07-01) governs refunds, returns, delivery and order-status requests. Its header says it replaces RP-3.1 and all earlier customer-care guidance.</li>
+    <li><strong>HC-FAQ v2</strong> (published 2025-10-14) is superseded: its 14-day window, $250 auto threshold and 5-day stale rule conflict with the newer dedicated Customer Care policy.</li>
+    <li><strong>WH-PICK-1.4</strong> (effective 2026-08-15) is out of scope: its own Scope says it does not set Customer Care return, refund or approval rules, and it deals in stock cost, not payments.</li>
+  </ul>
+  <p>Only the ten policy reason codes are emitted. The engine is in
+  <a href="src/rules.py">src/rules.py</a>.</p>
+
+  <h2>3. Evaluation before and after O12</h2>
+  <ul>
+    <li><strong>Before</strong> (<code>evals/results/results_20261110T135537Z.json</code>): 20/21 passed (95.24%). <code>NEG-DUP-T002</code> failed: it returned <code>PROCEED</code> instead of <code>REJECT</code>/<code>ALREADY_REFUNDED</code>; the ledger assertion already showed exactly one refund row.</li>
+    <li><strong>After</strong> (<code>evals/results/results_20261110T140115Z.json</code>): 21/21 passed (100%). O12 now fingerprints normalised sender, order, affected line numbers and action. A matching PROPOSED/APPROVED REFUND makes <code>CHK_PROCESS_ONCE</code> fail, returns <code>REJECT</code>/<code>ALREADY_REFUNDED</code>, records ledger <code>REPLY</code>, and the reply references the earlier run. Reason-code matches: 8/8; amount matches: 4/4.</li>
+    <li>Cases: <a href="evals/cases.json">evals/cases.json</a>; runner and pass rule: <a href="evals/run_eval.py">evals/run_eval.py</a>.</li>
+  </ul>
+
+  <h2>4. Cost and latency measurement</h2>
+  <ul>
+    <li>Cost: for each model call, measured <code>input_tokens</code> and <code>output_tokens</code> are multiplied by the per-model prices in <code>src/pricing.py</code>.</li>
+    <li>Latency: wall-clock time from <code>POST /tickets</code> entry to persistence is recorded as <code>latency_ms</code>.</li>
+    <li>Median cost per request in the local AFTER eval: $0.000968.</li>
+  </ul>
+
+  <h2>5. Open-case rules (O1–O19)</h2>
+  <ol>
+    <li><strong>O1 — Change of mind within 30 days:</strong> refund affected line value; after 30 days reject with <code>OUT_OF_WINDOW</code>.</li>
+    <li><strong>O2 — Shipping fees:</strong> never refund <code>shipping_fee</code>; refund affected line value only and explain with <code>PARTIAL_LINES</code>.</li>
+    <li><strong>O3 — Day counting:</strong> count whole UTC calendar days from <code>delivered_at</code>, inclusive of day 30; days 31–45 are the damage exception; &gt;45 is out.</li>
+    <li><strong>O4 — Photo evidence:</strong> accept any attachment whose <code>content_type</code> starts with <code>image/</code>; never decode base64.</li>
+    <li><strong>O5 — Partial quantity:</strong> refund <code>affected_qty × unit_price</code>, never more than ordered quantity; leave undamaged units untouched.</li>
+    <li><strong>O6 — Partial prior refund:</strong> subtract the sum of <code>ISSUED</code> amounts for the line and propose the remaining balance; zero balance is <code>ALREADY_REFUNDED</code>.</li>
+    <li><strong>O7 — Non-ISSUED refunds:</strong> count only <code>ISSUED</code> refunds against a line.</li>
+    <li><strong>O8 — Order vs carrier status:</strong> carrier <code>delivered_at</code> and shipment status are authoritative.</li>
+    <li><strong>O9 — Multiple orders:</strong> process one order per request; several valid orders returns <code>PEND</code> with <code>SUPPORT_LEAD</code>.</li>
+    <li><strong>O10 — Carrier says DELIVERED but customer disputes:</strong> <code>ESCALATE</code> to <code>CARRIER_CLAIMS</code> with empty <code>reason_codes</code>; propose no refund.</li>
+    <li><strong>O11 — Damage claimed before delivery:</strong> propose no refund; reply with current status and re-evaluate after delivery.</li>
+    <li><strong>O12 — Duplicate/forwarded ticket:</strong> fingerprint sender, order, affected lines and action; a matching PROPOSED/APPROVED REFUND returns <code>REJECT</code>/<code>ALREADY_REFUNDED</code>, ledger <code>REPLY</code>, and no second refund.</li>
+    <li><strong>O13 — Exactly $150.00:</strong> proceed without approval; only amounts above $150.00 require the Support Lead.</li>
+    <li><strong>O14 — No order reference:</strong> parse subject and body; use the sender's sole order, ask which order if several, and <code>INVALID_REQUEST</code> if the sender is not on file.</li>
+    <li><strong>O15 — Non-USD currency:</strong> return <code>INVALID_REQUEST</code>; the data and contract are USD-only.</li>
+    <li><strong>O16 — Status query for UNAVAILABLE shipment:</strong> return <code>UNABLE_TO_VERIFY</code> with <code>CARRIER_STATUS_UNAVAILABLE</code>.</li>
+    <li><strong>O17 — Lost-in-transit clock:</strong> evaluate the &gt;10-day silence against <code>ticket.received_at</code> using <code>last_event_at</code>, and record that <code>as_of</code>.</li>
+    <li><strong>O18 — Override plus identity mismatch:</strong> policy override wins: <code>ESCALATE</code> to <code>TRUST_SAFETY</code>, noting the identity discrepancy.</li>
+    <li><strong>O19 — Ledger mapping:</strong> PEND → REFUND/PROPOSED then APPROVED/REJECTED; auto PROCEED/PROCEED_MODIFIED → REFUND/PROPOSED; REJECT/INVALID_REQUEST/UNABLE_TO_VERIFY/status → REPLY; ESCALATE → ESCALATION.</li>
+  </ol>
+
+  <h2>6. What is not built</h2>
+  <ul>
+    <li>No payment execution: the service never moves money; refunds stay <code>PROPOSED</code>.</li>
+    <li>No LLM-authored customer replies; replies are templates in <a href="src/reply.py">src/reply.py</a>.</li>
+    <li>No automatic splitting of multi-order tickets; O9 sends them to human triage.</li>
+    <li>No persistent runtime disk: <code>build/runtime.db</code> resets on redeploy.</li>
+    <li>No dashboard, authentication, queueing or production monitoring.</li>
+    <li>No image-content analysis; only attachment presence and <code>content_type</code>.</li>
+    <li>No non-USD support and no fuzzy order matching.</li>
+  </ul>
 </body>
 </html>
