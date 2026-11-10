@@ -37,6 +37,7 @@ class DecisionResult:
     ledger_action: str = "REPLY"
     ledger_status: str = "APPROVED"
     fingerprint: str = ""
+    duplicate_of_run_id: str | None = None
 
 
 def _evidence(source: str, ref: Any, value: Any) -> Evidence:
@@ -284,6 +285,7 @@ def evaluate(
         ledger_status: str = "APPROVED",
         refund_lines: list[dict[str, Any]] | None = None,
         fingerprint_lines: list[int] | None = None,
+        duplicate_of_run_id: str | None = None,
     ) -> DecisionResult:
         action = ledger_action
         if action == "REFUND" and not fingerprint_lines:
@@ -312,6 +314,7 @@ def evaluate(
             ledger_action=ledger_action,
             ledger_status=ledger_status,
             fingerprint=_fingerprint(sender, resolved_order_id, fingerprint_lines or [], action),
+            duplicate_of_run_id=duplicate_of_run_id,
         )
 
     if extraction.injection_detected:
@@ -793,11 +796,17 @@ def evaluate(
         ],
     )
 
-    process_once_lookup = existing_refund_lookup
-    conflict = None
-    if process_once_lookup is not None:
-        for line in refund_lines:
-            conflict = conflict or process_once_lookup(line["order_id"], line["line_no"])
+    process_once_fingerprint = _fingerprint(
+        sender,
+        order["order_id"],
+        [int(item["line_no"]) for item in matched_items],
+        "REFUND",
+    )
+    conflict = (
+        existing_refund_lookup(process_once_fingerprint)
+        if existing_refund_lookup is not None
+        else None
+    )
     if conflict is not None:
         _add(
             checks,
@@ -808,18 +817,34 @@ def evaluate(
                 _evidence(
                     "ledger",
                     conflict.get("run_id"),
-                    f"existing {conflict.get('action')} {conflict.get('status')} for {conflict.get('order_id')} line {conflict.get('line_no')}",
+                    f"existing {conflict.get('action')} {conflict.get('status')} matches fingerprint "
+                    f"{process_once_fingerprint}; order={order['order_id']}; "
+                    f"lines={[int(item['line_no']) for item in matched_items]}",
                 )
             ],
         )
-    else:
-        _add(
-            checks,
-            "CHK_PROCESS_ONCE",
-            "PASS",
-            "RP-3.2 §3.3",
-            [_evidence("ledger", order["order_id"], "no prior refund proposal for affected line(s)")],
+        return with_context(
+            result(
+                outcome="REJECT",
+                codes=["ALREADY_REFUNDED"],
+                status="CLOSED",
+                ledger_action="REPLY",
+                duplicate_of_run_id=str(conflict.get("run_id")),
+            )
         )
+    _add(
+        checks,
+        "CHK_PROCESS_ONCE",
+        "PASS",
+        "RP-3.2 §3.3",
+        [
+            _evidence(
+                "ledger",
+                order["order_id"],
+                f"no prior refund row for fingerprint {process_once_fingerprint}",
+            )
+        ],
+    )
 
     if fully_refunded and total <= 0.0:
         return with_context(

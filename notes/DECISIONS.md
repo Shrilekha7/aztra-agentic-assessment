@@ -133,7 +133,7 @@ ticket JSON (untrusted)
 9. **O9 — Multiple orders in one ticket:** process one order per request; if several valid orders are cited, return `PEND` with `human_approval_required` true and `approver_role` `SUPPORT_LEAD` for human triage.
 10. **O10 — Carrier says DELIVERED but customer disputes:** `ESCALATE` to `CARRIER_CLAIMS` with empty `reason_codes` (policy codes only — never invent `DELIVERY_DISPUTE`); propose no refund.
 11. **O11 — Damage claimed before delivery:** propose no refund until delivery; reply with current status (`PROCEED`) and re-evaluate the window after delivery.
-12. **O12 — Duplicate/forwarded ticket:** treat as the same request and process once; reply referencing the existing outcome, never issue a second refund.
+12. **O12 — Duplicate/forwarded ticket:** fingerprint (normalised sender, order_id, affected line_nos, action); if a PROPOSED/APPROVED REFUND matches, `REJECT` with `ALREADY_REFUNDED`, `CHK_PROCESS_ONCE` FAIL, ledger `REPLY`, and the reply references the earlier run; never propose a second refund.
 13. **O13 — Exactly $150.00:** proceed without approval (inclusive bound); only amounts above $150.00 require the Support Lead.
 14. **O14 — No resolvable order reference:** parse `subject + body`; if the sender has exactly one order on file, use it; if several, return `UNABLE_TO_VERIFY` and ask which order; if the sender email is not on file, return `INVALID_REQUEST`; never guess or fuzzy-match an order.
 15. **O15 — Non-USD currency:** return `INVALID_REQUEST`; the contract and dataset are USD-only.

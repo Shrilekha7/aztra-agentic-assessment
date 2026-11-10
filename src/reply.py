@@ -90,6 +90,13 @@ def build_draft_reply(ticket: dict[str, Any], decision: DecisionResult) -> Draft
             f"Hello,\n\nWe have escalated {order} to {team}. {detail} No refund is being "
             f"proposed while that review is under way.\n\nKind regards,\nLarkfield Home Support"
         )
+    elif outcome == "REJECT" and decision.duplicate_of_run_id:
+        body = (
+            f"Hello,\n\nThis matches your earlier request {decision.duplicate_of_run_id} for "
+            f"{order}. We have kept that existing refund request and will not propose a second "
+            f"refund. If you need an update, please reply to this message.\n\n"
+            f"Kind regards,\nLarkfield Home Support"
+        )
     elif outcome == "REJECT":
         body = (
             f"Hello,\n\nWe are unable to approve a refund for {items} on {order}. Reason: "

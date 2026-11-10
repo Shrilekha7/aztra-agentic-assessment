@@ -167,7 +167,7 @@ def create_ticket(payload: Any = Body(default=None)) -> TicketResponse:
 
     try:
         extraction = EXTRACTOR.extract(ticket, data.product_names())
-        decision = evaluate(ticket, extraction, runtime.existing_refund)
+        decision = evaluate(ticket, extraction, runtime.existing_refund_for_fingerprint)
         response = _assemble_response(ticket, extraction, decision, run_id)
         latency_ms = round((time.perf_counter() - started) * 1000, 3)
         _persist(

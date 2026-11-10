@@ -43,7 +43,8 @@ def _connect() -> sqlite3.Connection:
             amount_usd REAL,
             status TEXT NOT NULL,
             recorded_at TEXT NOT NULL,
-            idempotency_key TEXT
+            idempotency_key TEXT,
+            fingerprint TEXT
         );
         CREATE UNIQUE INDEX IF NOT EXISTS ux_ledger_idempotency
             ON ledger(idempotency_key);
@@ -52,6 +53,9 @@ def _connect() -> sqlite3.Connection:
             WHERE action = 'REFUND' AND status IN ('PROPOSED', 'APPROVED');
         """
     )
+    columns = {row[1] for row in connection.execute("PRAGMA table_info(ledger)")}
+    if "fingerprint" not in columns:
+        connection.execute("ALTER TABLE ledger ADD COLUMN fingerprint TEXT")
     return connection
 
 
@@ -146,6 +150,22 @@ def existing_refund(order_id: str | None, line_no: int | None) -> dict[str, Any]
     return dict(row) if row else None
 
 
+def existing_refund_for_fingerprint(fingerprint: str | None) -> dict[str, Any] | None:
+    if not fingerprint:
+        return None
+    with _connect() as connection:
+        row = connection.execute(
+            """
+            SELECT * FROM ledger
+            WHERE fingerprint = ? AND action = 'REFUND'
+              AND status IN ('PROPOSED', 'APPROVED')
+            LIMIT 1
+            """,
+            (fingerprint,),
+        ).fetchone()
+    return dict(row) if row else None
+
+
 def record_ledger(
     *,
     run_id: str,
@@ -167,8 +187,8 @@ def record_ledger(
                         """
                         INSERT OR IGNORE INTO ledger (
                             run_id, ticket_id, order_id, line_no, action,
-                            amount_usd, status, recorded_at, idempotency_key
-                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                            amount_usd, status, recorded_at, idempotency_key, fingerprint
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                         """,
                         (
                             run_id,
@@ -180,6 +200,7 @@ def record_ledger(
                             status,
                             recorded_at,
                             key,
+                            fingerprint,
                         ),
                     )
                     inserted += cursor.rowcount
@@ -189,10 +210,21 @@ def record_ledger(
                     """
                     INSERT OR IGNORE INTO ledger (
                         run_id, ticket_id, order_id, line_no, action,
-                        amount_usd, status, recorded_at, idempotency_key
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        amount_usd, status, recorded_at, idempotency_key, fingerprint
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """,
-                    (run_id, ticket_id, None, None, action, amount_usd, status, recorded_at, key),
+                    (
+                        run_id,
+                        ticket_id,
+                        None,
+                        None,
+                        action,
+                        amount_usd,
+                        status,
+                        recorded_at,
+                        key,
+                        fingerprint,
+                    ),
                 )
                 inserted += cursor.rowcount
         else:
@@ -200,10 +232,20 @@ def record_ledger(
                 """
                 INSERT INTO ledger (
                     run_id, ticket_id, order_id, line_no, action,
-                    amount_usd, status, recorded_at, idempotency_key
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NULL)
+                    amount_usd, status, recorded_at, idempotency_key, fingerprint
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NULL, ?)
                 """,
-                (run_id, ticket_id, None, None, action, amount_usd, status, recorded_at),
+                (
+                    run_id,
+                    ticket_id,
+                    None,
+                    None,
+                    action,
+                    amount_usd,
+                    status,
+                    recorded_at,
+                    fingerprint,
+                ),
             )
             inserted += cursor.rowcount
     return inserted
