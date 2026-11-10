@@ -49,6 +49,7 @@ class ExtractionResult:
     cost_usd: float = 0.0
     llm_used: bool = False
     llm_fallback: bool = False
+    fallback_reason: str | None = None
     extractor_tools: list[str] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:

@@ -69,12 +69,18 @@ def _run_view(row: sqlite3.Row) -> dict[str, Any]:
             "approver": row["decision_approver"],
             "decided_at": row["decision_decided_at"],
         }
+    extraction: dict[str, Any] = {}
+    try:
+        extraction = json.loads(row["extraction_json"] or "{}")
+    except (TypeError, ValueError):
+        extraction = {}
     response.update(
         {
             "status": row["status"],
             "decision": decision,
             "amount_usd": row["amount_usd"],
             "latency_ms": row["latency_ms"],
+            "fallback_reason": extraction.get("fallback_reason"),
         }
     )
     return response
