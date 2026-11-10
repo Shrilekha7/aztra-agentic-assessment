@@ -107,6 +107,7 @@ def _run_case(
         duplicate_refunds = [
             row for row in ledger if row["run_id"] == body["run_id"] and row["action"] == "REFUND"
         ]
+        total_refunds = len(previous_refunds) + len(duplicate_refunds)
         result["assertions"].append(
             {
                 "name": "original_refund_still_present",
@@ -116,9 +117,12 @@ def _run_case(
         )
         result["assertions"].append(
             {
-                "name": "duplicate_created_no_refund_row",
-                "passed": len(duplicate_refunds) == 0,
-                "detail": f"{len(duplicate_refunds)} refund row(s) for duplicate run",
+                "name": "exactly_one_refund_row_for_line",
+                "passed": total_refunds == 1,
+                "detail": (
+                    f"{total_refunds} refund row(s) across original and duplicate runs "
+                    f"(original={len(previous_refunds)}, duplicate={len(duplicate_refunds)})"
+                ),
             }
         )
 

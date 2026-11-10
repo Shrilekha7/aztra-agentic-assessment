@@ -367,11 +367,10 @@
         ]
       },
       "expected": {
-        "outcome": "PROCEED",
+        "outcome": "REJECT",
         "human_approval_required": false,
         "approver_role": null,
-        "reason_codes": [],
-        "amount_usd": 129.0
+        "reason_codes": ["ALREADY_REFUNDED"]
       },
       "assert_no_second_refund": {
         "previous_case_id": "T002"

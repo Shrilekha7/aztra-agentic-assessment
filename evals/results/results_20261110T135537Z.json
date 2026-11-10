@@ -1,0 +1,1210 @@
+{
+  "summary": {
+    "generated_at": "2026-11-10T13:55:37.680453+00:00",
+    "base_url": "http://127.0.0.1:8123",
+    "cases_total": 21,
+    "passed": 20,
+    "pass_rate": 0.9524,
+    "reason_codes_scored": 8,
+    "reason_codes_matches": 7,
+    "amount_scored": 4,
+    "amount_matches": 4,
+    "median_cost_usd": 0.000968,
+    "median_latency_ms": 2994.181
+  },
+  "results": [
+    {
+      "case_id": "T001",
+      "ticket_id": "T001",
+      "description": "Photo-backed faulty/damaged item in the extended window; authority unchanged",
+      "expected": {
+        "outcome": "PEND",
+        "human_approval_required": true,
+        "approver_role": "SUPPORT_LEAD",
+        "reason_codes": [
+          "DAMAGE_EXCEPTION",
+          "APPROVAL_REQUIRED"
+        ],
+        "amount_usd": 210.0
+      },
+      "assertions": [],
+      "actual": {
+        "outcome": "PEND",
+        "human_approval_required": true,
+        "approver_role": "SUPPORT_LEAD",
+        "reason_codes": [
+          "DAMAGE_EXCEPTION",
+          "APPROVAL_REQUIRED"
+        ],
+        "amount_usd": 210.0,
+        "status": "AWAITING_APPROVAL",
+        "fallback_reason": null,
+        "cost_usd": 0.000976,
+        "latency_ms": 1971.865
+      },
+      "trace": {
+        "model_calls": [
+          {
+            "model": "qwen/qwen3.8-27b",
+            "input_tokens": 655,
+            "output_tokens": 113
+          }
+        ],
+        "tools_called": [
+          "lookup_customer",
+          "lookup_order",
+          "lookup_shipment",
+          "lookup_order_items",
+          "lookup_refunds",
+          "llm_extract"
+        ],
+        "documents_used": [
+          {
+            "document": "RP-3.2",
+            "version": "3.2"
+          }
+        ],
+        "cost_usd": 0.000976
+      },
+      "primary_match": true,
+      "reason_codes_match": true,
+      "amount_match": true,
+      "passed": true
+    },
+    {
+      "case_id": "T002",
+      "ticket_id": "T002",
+      "description": "labelled ticket",
+      "expected": {
+        "outcome": "PROCEED",
+        "human_approval_required": false,
+        "approver_role": null
+      },
+      "assertions": [],
+      "actual": {
+        "outcome": "PROCEED",
+        "human_approval_required": false,
+        "approver_role": null,
+        "reason_codes": [],
+        "amount_usd": 129.0,
+        "status": "OPEN",
+        "fallback_reason": null,
+        "cost_usd": 0.0009704,
+        "latency_ms": 498.176
+      },
+      "trace": {
+        "model_calls": [
+          {
+            "model": "qwen/qwen3.8-27b",
+            "input_tokens": 653,
+            "output_tokens": 112
+          }
+        ],
+        "tools_called": [
+          "lookup_customer",
+          "lookup_order",
+          "lookup_shipment",
+          "lookup_order_items",
+          "lookup_refunds",
+          "llm_extract"
+        ],
+        "documents_used": [
+          {
+            "document": "RP-3.2",
+            "version": "3.2"
+          }
+        ],
+        "cost_usd": 0.0009704
+      },
+      "primary_match": true,
+      "reason_codes_match": null,
+      "amount_match": null,
+      "passed": true
+    },
+    {
+      "case_id": "T003",
+      "ticket_id": "T003",
+      "description": "labelled ticket",
+      "expected": {
+        "outcome": "PEND",
+        "human_approval_required": true,
+        "approver_role": "SUPPORT_LEAD"
+      },
+      "assertions": [],
+      "actual": {
+        "outcome": "PEND",
+        "human_approval_required": true,
+        "approver_role": "SUPPORT_LEAD",
+        "reason_codes": [
+          "APPROVAL_REQUIRED"
+        ],
+        "amount_usd": 185.0,
+        "status": "AWAITING_APPROVAL",
+        "fallback_reason": null,
+        "cost_usd": 0.0009664,
+        "latency_ms": 508.934
+      },
+      "trace": {
+        "model_calls": [
+          {
+            "model": "qwen/qwen3.8-27b",
+            "input_tokens": 653,
+            "output_tokens": 111
+          }
+        ],
+        "tools_called": [
+          "lookup_customer",
+          "lookup_order",
+          "lookup_shipment",
+          "lookup_order_items",
+          "lookup_refunds",
+          "llm_extract"
+        ],
+        "documents_used": [
+          {
+            "document": "RP-3.2",
+            "version": "3.2"
+          }
+        ],
+        "cost_usd": 0.0009664
+      },
+      "primary_match": true,
+      "reason_codes_match": null,
+      "amount_match": null,
+      "passed": true
+    },
+    {
+      "case_id": "T004",
+      "ticket_id": "T004",
+      "description": "labelled ticket",
+      "expected": {
+        "outcome": "PROCEED",
+        "human_approval_required": false,
+        "approver_role": null
+      },
+      "assertions": [],
+      "actual": {
+        "outcome": "PROCEED",
+        "human_approval_required": false,
+        "approver_role": null,
+        "reason_codes": [],
+        "amount_usd": 45.0,
+        "status": "OPEN",
+        "fallback_reason": null,
+        "cost_usd": 0.0009616,
+        "latency_ms": 577.864
+      },
+      "trace": {
+        "model_calls": [
+          {
+            "model": "qwen/qwen3.8-27b",
+            "input_tokens": 652,
+            "output_tokens": 110
+          }
+        ],
+        "tools_called": [
+          "lookup_customer",
+          "lookup_order",
+          "lookup_shipment",
+          "lookup_order_items",
+          "lookup_refunds",
+          "llm_extract"
+        ],
+        "documents_used": [
+          {
+            "document": "RP-3.2",
+            "version": "3.2"
+          }
+        ],
+        "cost_usd": 0.0009616
+      },
+      "primary_match": true,
+      "reason_codes_match": null,
+      "amount_match": null,
+      "passed": true
+    },
+    {
+      "case_id": "T005",
+      "ticket_id": "T005",
+      "description": "labelled ticket",
+      "expected": {
+        "outcome": "PROCEED",
+        "human_approval_required": false,
+        "approver_role": null
+      },
+      "assertions": [],
+      "actual": {
+        "outcome": "PROCEED",
+        "human_approval_required": false,
+        "approver_role": null,
+        "reason_codes": [],
+        "amount_usd": 38.0,
+        "status": "OPEN",
+        "fallback_reason": null,
+        "cost_usd": 0.0009976,
+        "latency_ms": 521.654
+      },
+      "trace": {
+        "model_calls": [
+          {
+            "model": "qwen/qwen3.8-27b",
+            "input_tokens": 662,
+            "output_tokens": 117
+          }
+        ],
+        "tools_called": [
+          "lookup_customer",
+          "lookup_order",
+          "lookup_shipment",
+          "lookup_order_items",
+          "lookup_refunds",
+          "llm_extract"
+        ],
+        "documents_used": [
+          {
+            "document": "RP-3.2",
+            "version": "3.2"
+          }
+        ],
+        "cost_usd": 0.0009976
+      },
+      "primary_match": true,
+      "reason_codes_match": null,
+      "amount_match": null,
+      "passed": true
+    },
+    {
+      "case_id": "T006",
+      "ticket_id": "T006",
+      "description": "labelled ticket",
+      "expected": {
+        "outcome": "PROCEED",
+        "human_approval_required": false,
+        "approver_role": null
+      },
+      "assertions": [],
+      "actual": {
+        "outcome": "PROCEED",
+        "human_approval_required": false,
+        "approver_role": null,
+        "reason_codes": [],
+        "amount_usd": 52.0,
+        "status": "OPEN",
+        "fallback_reason": null,
+        "cost_usd": 0.0009576,
+        "latency_ms": 815.291
+      },
+      "trace": {
+        "model_calls": [
+          {
+            "model": "qwen/qwen3.8-27b",
+            "input_tokens": 647,
+            "output_tokens": 110
+          }
+        ],
+        "tools_called": [
+          "lookup_customer",
+          "lookup_order",
+          "lookup_shipment",
+          "lookup_order_items",
+          "lookup_refunds",
+          "llm_extract"
+        ],
+        "documents_used": [
+          {
+            "document": "RP-3.2",
+            "version": "3.2"
+          }
+        ],
+        "cost_usd": 0.0009576
+      },
+      "primary_match": true,
+      "reason_codes_match": null,
+      "amount_match": null,
+      "passed": true
+    },
+    {
+      "case_id": "T008",
+      "ticket_id": "T008",
+      "description": "labelled ticket",
+      "expected": {
+        "outcome": "PROCEED",
+        "human_approval_required": false,
+        "approver_role": null
+      },
+      "assertions": [],
+      "actual": {
+        "outcome": "PROCEED",
+        "human_approval_required": false,
+        "approver_role": null,
+        "reason_codes": [],
+        "amount_usd": null,
+        "status": "CLOSED",
+        "fallback_reason": null,
+        "cost_usd": 0.0009296,
+        "latency_ms": 588.582
+      },
+      "trace": {
+        "model_calls": [
+          {
+            "model": "qwen/qwen3.8-27b",
+            "input_tokens": 647,
+            "output_tokens": 103
+          }
+        ],
+        "tools_called": [
+          "lookup_customer",
+          "lookup_order",
+          "lookup_shipment",
+          "lookup_order_items",
+          "lookup_refunds",
+          "llm_extract"
+        ],
+        "documents_used": [
+          {
+            "document": "RP-3.2",
+            "version": "3.2"
+          }
+        ],
+        "cost_usd": 0.0009296
+      },
+      "primary_match": true,
+      "reason_codes_match": null,
+      "amount_match": null,
+      "passed": true
+    },
+    {
+      "case_id": "T011",
+      "ticket_id": "T011",
+      "description": "labelled ticket",
+      "expected": {
+        "outcome": "ESCALATE",
+        "human_approval_required": true,
+        "approver_role": "CARRIER_CLAIMS"
+      },
+      "assertions": [],
+      "actual": {
+        "outcome": "ESCALATE",
+        "human_approval_required": true,
+        "approver_role": "CARRIER_CLAIMS",
+        "reason_codes": [
+          "LOST_IN_TRANSIT"
+        ],
+        "amount_usd": null,
+        "status": "CLOSED",
+        "fallback_reason": null,
+        "cost_usd": 0.00094,
+        "latency_ms": 765.429
+      },
+      "trace": {
+        "model_calls": [
+          {
+            "model": "qwen/qwen3.8-27b",
+            "input_tokens": 650,
+            "output_tokens": 105
+          }
+        ],
+        "tools_called": [
+          "lookup_customer",
+          "lookup_order",
+          "lookup_shipment",
+          "lookup_order_items",
+          "lookup_refunds",
+          "llm_extract"
+        ],
+        "documents_used": [
+          {
+            "document": "RP-3.2",
+            "version": "3.2"
+          }
+        ],
+        "cost_usd": 0.00094
+      },
+      "primary_match": true,
+      "reason_codes_match": null,
+      "amount_match": null,
+      "passed": true
+    },
+    {
+      "case_id": "T013",
+      "ticket_id": "T013",
+      "description": "labelled ticket",
+      "expected": {
+        "outcome": "UNABLE_TO_VERIFY",
+        "human_approval_required": false,
+        "approver_role": null
+      },
+      "assertions": [],
+      "actual": {
+        "outcome": "UNABLE_TO_VERIFY",
+        "human_approval_required": false,
+        "approver_role": null,
+        "reason_codes": [
+          "CARRIER_STATUS_UNAVAILABLE"
+        ],
+        "amount_usd": null,
+        "status": "CLOSED",
+        "fallback_reason": null,
+        "cost_usd": 0.0009256,
+        "latency_ms": 478.058
+      },
+      "trace": {
+        "model_calls": [
+          {
+            "model": "qwen/qwen3.8-27b",
+            "input_tokens": 637,
+            "output_tokens": 104
+          }
+        ],
+        "tools_called": [
+          "lookup_customer",
+          "lookup_order",
+          "lookup_shipment",
+          "lookup_order_items",
+          "lookup_refunds",
+          "llm_extract"
+        ],
+        "documents_used": [
+          {
+            "document": "RP-3.2",
+            "version": "3.2"
+          }
+        ],
+        "cost_usd": 0.0009256
+      },
+      "primary_match": true,
+      "reason_codes_match": null,
+      "amount_match": null,
+      "passed": true
+    },
+    {
+      "case_id": "T014",
+      "ticket_id": "T014",
+      "description": "labelled ticket",
+      "expected": {
+        "outcome": "REJECT",
+        "human_approval_required": false,
+        "approver_role": null
+      },
+      "assertions": [],
+      "actual": {
+        "outcome": "REJECT",
+        "human_approval_required": false,
+        "approver_role": null,
+        "reason_codes": [
+          "OUT_OF_WINDOW"
+        ],
+        "amount_usd": null,
+        "status": "CLOSED",
+        "fallback_reason": null,
+        "cost_usd": 0.000988,
+        "latency_ms": 546.82
+      },
+      "trace": {
+        "model_calls": [
+          {
+            "model": "qwen/qwen3.8-27b",
+            "input_tokens": 655,
+            "output_tokens": 116
+          }
+        ],
+        "tools_called": [
+          "lookup_customer",
+          "lookup_order",
+          "lookup_shipment",
+          "lookup_order_items",
+          "lookup_refunds",
+          "llm_extract"
+        ],
+        "documents_used": [
+          {
+            "document": "RP-3.2",
+            "version": "3.2"
+          }
+        ],
+        "cost_usd": 0.000988
+      },
+      "primary_match": true,
+      "reason_codes_match": null,
+      "amount_match": null,
+      "passed": true
+    },
+    {
+      "case_id": "T018",
+      "ticket_id": "T018",
+      "description": "labelled ticket",
+      "expected": {
+        "outcome": "REJECT",
+        "human_approval_required": false,
+        "approver_role": null
+      },
+      "assertions": [],
+      "actual": {
+        "outcome": "REJECT",
+        "human_approval_required": false,
+        "approver_role": null,
+        "reason_codes": [
+          "ALREADY_REFUNDED"
+        ],
+        "amount_usd": null,
+        "status": "CLOSED",
+        "fallback_reason": null,
+        "cost_usd": 0.0009632,
+        "latency_ms": 7305.618
+      },
+      "trace": {
+        "model_calls": [
+          {
+            "model": "qwen/qwen3.8-27b",
+            "input_tokens": 0,
+            "output_tokens": 0
+          },
+          {
+            "model": "qwen/qwen3.8-27b",
+            "input_tokens": 644,
+            "output_tokens": 112
+          }
+        ],
+        "tools_called": [
+          "lookup_customer",
+          "lookup_order",
+          "lookup_shipment",
+          "lookup_order_items",
+          "lookup_refunds",
+          "llm_extract"
+        ],
+        "documents_used": [
+          {
+            "document": "RP-3.2",
+            "version": "3.2"
+          }
+        ],
+        "cost_usd": 0.0009632
+      },
+      "primary_match": true,
+      "reason_codes_match": null,
+      "amount_match": null,
+      "passed": true
+    },
+    {
+      "case_id": "T019",
+      "ticket_id": "T019",
+      "description": "labelled ticket",
+      "expected": {
+        "outcome": "PROCEED_MODIFIED",
+        "human_approval_required": false,
+        "approver_role": null
+      },
+      "assertions": [],
+      "actual": {
+        "outcome": "PROCEED_MODIFIED",
+        "human_approval_required": false,
+        "approver_role": null,
+        "reason_codes": [
+          "PARTIAL_LINES"
+        ],
+        "amount_usd": 27.5,
+        "status": "OPEN",
+        "fallback_reason": null,
+        "cost_usd": 0.0009736,
+        "latency_ms": 5665.161
+      },
+      "trace": {
+        "model_calls": [
+          {
+            "model": "qwen/qwen3.8-27b",
+            "input_tokens": 0,
+            "output_tokens": 0
+          },
+          {
+            "model": "qwen/qwen3.8-27b",
+            "input_tokens": 652,
+            "output_tokens": 113
+          }
+        ],
+        "tools_called": [
+          "lookup_customer",
+          "lookup_order",
+          "lookup_shipment",
+          "lookup_order_items",
+          "lookup_refunds",
+          "llm_extract"
+        ],
+        "documents_used": [
+          {
+            "document": "RP-3.2",
+            "version": "3.2"
+          }
+        ],
+        "cost_usd": 0.0009736
+      },
+      "primary_match": true,
+      "reason_codes_match": null,
+      "amount_match": null,
+      "passed": true
+    },
+    {
+      "case_id": "T020",
+      "ticket_id": "T020",
+      "description": "labelled ticket",
+      "expected": {
+        "outcome": "ESCALATE",
+        "human_approval_required": true,
+        "approver_role": "TRUST_SAFETY"
+      },
+      "assertions": [],
+      "actual": {
+        "outcome": "ESCALATE",
+        "human_approval_required": true,
+        "approver_role": "TRUST_SAFETY",
+        "reason_codes": [
+          "POLICY_OVERRIDE_ATTEMPT"
+        ],
+        "amount_usd": null,
+        "status": "CLOSED",
+        "fallback_reason": null,
+        "cost_usd": 0.0011736,
+        "latency_ms": 7330.431
+      },
+      "trace": {
+        "model_calls": [
+          {
+            "model": "qwen/qwen3.8-27b",
+            "input_tokens": 0,
+            "output_tokens": 0
+          },
+          {
+            "model": "qwen/qwen3.8-27b",
+            "input_tokens": 702,
+            "output_tokens": 153
+          }
+        ],
+        "tools_called": [
+          "lookup_customer",
+          "lookup_order",
+          "llm_extract"
+        ],
+        "documents_used": [
+          {
+            "document": "RP-3.2",
+            "version": "3.2"
+          }
+        ],
+        "cost_usd": 0.0011736
+      },
+      "primary_match": true,
+      "reason_codes_match": null,
+      "amount_match": null,
+      "passed": true
+    },
+    {
+      "case_id": "T021",
+      "ticket_id": "T021",
+      "description": "labelled ticket",
+      "expected": {
+        "outcome": "ESCALATE",
+        "human_approval_required": true,
+        "approver_role": "TRUST_SAFETY"
+      },
+      "assertions": [],
+      "actual": {
+        "outcome": "ESCALATE",
+        "human_approval_required": true,
+        "approver_role": "TRUST_SAFETY",
+        "reason_codes": [
+          "POLICY_OVERRIDE_ATTEMPT"
+        ],
+        "amount_usd": null,
+        "status": "CLOSED",
+        "fallback_reason": null,
+        "cost_usd": 0.0010856,
+        "latency_ms": 7861.254
+      },
+      "trace": {
+        "model_calls": [
+          {
+            "model": "qwen/qwen3.8-27b",
+            "input_tokens": 0,
+            "output_tokens": 0
+          },
+          {
+            "model": "qwen/qwen3.8-27b",
+            "input_tokens": 672,
+            "output_tokens": 137
+          }
+        ],
+        "tools_called": [
+          "lookup_customer",
+          "lookup_order",
+          "llm_extract"
+        ],
+        "documents_used": [
+          {
+            "document": "RP-3.2",
+            "version": "3.2"
+          }
+        ],
+        "cost_usd": 0.0010856
+      },
+      "primary_match": true,
+      "reason_codes_match": null,
+      "amount_match": null,
+      "passed": true
+    },
+    {
+      "case_id": "T026",
+      "ticket_id": "T026",
+      "description": "Prior vase credit excluded; one damaged chair of two; proposal awaits approval",
+      "expected": {
+        "outcome": "PEND",
+        "human_approval_required": true,
+        "approver_role": "SUPPORT_LEAD",
+        "reason_codes": [
+          "ALREADY_REFUNDED",
+          "APPROVAL_REQUIRED"
+        ],
+        "amount_usd": 185.0
+      },
+      "assertions": [],
+      "actual": {
+        "outcome": "PEND",
+        "human_approval_required": true,
+        "approver_role": "SUPPORT_LEAD",
+        "reason_codes": [
+          "ALREADY_REFUNDED",
+          "APPROVAL_REQUIRED"
+        ],
+        "amount_usd": 185.0,
+        "status": "AWAITING_APPROVAL",
+        "fallback_reason": null,
+        "cost_usd": 0.0010048,
+        "latency_ms": 9993.351
+      },
+      "trace": {
+        "model_calls": [
+          {
+            "model": "qwen/qwen3.8-27b",
+            "input_tokens": 0,
+            "output_tokens": 0
+          },
+          {
+            "model": "qwen/qwen3.8-27b",
+            "input_tokens": 681,
+            "output_tokens": 115
+          }
+        ],
+        "tools_called": [
+          "lookup_customer",
+          "lookup_order",
+          "lookup_shipment",
+          "lookup_order_items",
+          "lookup_refunds",
+          "llm_extract"
+        ],
+        "documents_used": [
+          {
+            "document": "RP-3.2",
+            "version": "3.2"
+          }
+        ],
+        "cost_usd": 0.0010048
+      },
+      "primary_match": true,
+      "reason_codes_match": true,
+      "amount_match": true,
+      "passed": true
+    },
+    {
+      "case_id": "NEG-DUP-T002",
+      "ticket_id": "FWD-T002",
+      "description": "forwarded duplicate of T002 must not propose a second refund",
+      "expected": {
+        "outcome": "REJECT",
+        "human_approval_required": false,
+        "approver_role": null,
+        "reason_codes": [
+          "ALREADY_REFUNDED"
+        ]
+      },
+      "assertions": [
+        {
+          "name": "original_refund_still_present",
+          "passed": true,
+          "detail": "1 refund row(s) for T002"
+        },
+        {
+          "name": "exactly_one_refund_row_for_line",
+          "passed": true,
+          "detail": "1 refund row(s) across original and duplicate runs (original=1, duplicate=0)"
+        }
+      ],
+      "actual": {
+        "outcome": "PROCEED",
+        "human_approval_required": false,
+        "approver_role": null,
+        "reason_codes": [],
+        "amount_usd": 129.0,
+        "status": "OPEN",
+        "fallback_reason": null,
+        "cost_usd": 0.0009728,
+        "latency_ms": 5802.117
+      },
+      "trace": {
+        "model_calls": [
+          {
+            "model": "qwen/qwen3.8-27b",
+            "input_tokens": 0,
+            "output_tokens": 0
+          },
+          {
+            "model": "qwen/qwen3.8-27b",
+            "input_tokens": 656,
+            "output_tokens": 112
+          }
+        ],
+        "tools_called": [
+          "lookup_customer",
+          "lookup_order",
+          "lookup_shipment",
+          "lookup_order_items",
+          "lookup_refunds",
+          "llm_extract"
+        ],
+        "documents_used": [
+          {
+            "document": "RP-3.2",
+            "version": "3.2"
+          }
+        ],
+        "cost_usd": 0.0009728
+      },
+      "primary_match": false,
+      "reason_codes_match": false,
+      "amount_match": null,
+      "passed": false
+    },
+    {
+      "case_id": "NEG-INJECTION-MANAGEMENT",
+      "ticket_id": "NEG-INJ-MGMT",
+      "description": "management-authorisation injection phrasing not in the regex list",
+      "expected": {
+        "outcome": "ESCALATE",
+        "human_approval_required": true,
+        "approver_role": "TRUST_SAFETY",
+        "reason_codes": [
+          "POLICY_OVERRIDE_ATTEMPT"
+        ]
+      },
+      "assertions": [],
+      "actual": {
+        "outcome": "ESCALATE",
+        "human_approval_required": true,
+        "approver_role": "TRUST_SAFETY",
+        "reason_codes": [
+          "POLICY_OVERRIDE_ATTEMPT"
+        ],
+        "amount_usd": null,
+        "status": "CLOSED",
+        "fallback_reason": null,
+        "cost_usd": 0.0010056,
+        "latency_ms": 8140.504
+      },
+      "trace": {
+        "model_calls": [
+          {
+            "model": "qwen/qwen3.8-27b",
+            "input_tokens": 0,
+            "output_tokens": 0
+          },
+          {
+            "model": "qwen/qwen3.8-27b",
+            "input_tokens": 0,
+            "output_tokens": 0
+          },
+          {
+            "model": "qwen/qwen3.8-27b",
+            "input_tokens": 647,
+            "output_tokens": 122
+          }
+        ],
+        "tools_called": [
+          "lookup_customer",
+          "lookup_order",
+          "llm_extract"
+        ],
+        "documents_used": [
+          {
+            "document": "RP-3.2",
+            "version": "3.2"
+          }
+        ],
+        "cost_usd": 0.0010056
+      },
+      "primary_match": true,
+      "reason_codes_match": true,
+      "amount_match": null,
+      "passed": true
+    },
+    {
+      "case_id": "NEG-CUSTOMER-MISMATCH",
+      "ticket_id": "NEG-MISMATCH",
+      "description": "sender writes about another customer's order",
+      "expected": {
+        "outcome": "INVALID_REQUEST",
+        "human_approval_required": false,
+        "approver_role": null,
+        "reason_codes": [
+          "CUSTOMER_MISMATCH"
+        ]
+      },
+      "assertions": [],
+      "actual": {
+        "outcome": "INVALID_REQUEST",
+        "human_approval_required": false,
+        "approver_role": null,
+        "reason_codes": [
+          "CUSTOMER_MISMATCH"
+        ],
+        "amount_usd": null,
+        "status": "CLOSED",
+        "fallback_reason": null,
+        "cost_usd": 0.0009664,
+        "latency_ms": 7167.077
+      },
+      "trace": {
+        "model_calls": [
+          {
+            "model": "qwen/qwen3.8-27b",
+            "input_tokens": 0,
+            "output_tokens": 0
+          },
+          {
+            "model": "qwen/qwen3.8-27b",
+            "input_tokens": 643,
+            "output_tokens": 113
+          }
+        ],
+        "tools_called": [
+          "lookup_customer",
+          "lookup_order",
+          "llm_extract"
+        ],
+        "documents_used": [
+          {
+            "document": "RP-3.2",
+            "version": "3.2"
+          }
+        ],
+        "cost_usd": 0.0009664
+      },
+      "primary_match": true,
+      "reason_codes_match": true,
+      "amount_match": null,
+      "passed": true
+    },
+    {
+      "case_id": "NEG-NO-ORDER-SINGLE",
+      "ticket_id": "NEG-NO-ORDER",
+      "description": "no order number, sender has exactly one order",
+      "expected": {
+        "outcome": "PROCEED",
+        "human_approval_required": false,
+        "approver_role": null,
+        "reason_codes": [],
+        "amount_usd": 129.0
+      },
+      "assertions": [],
+      "actual": {
+        "outcome": "PROCEED",
+        "human_approval_required": false,
+        "approver_role": null,
+        "reason_codes": [],
+        "amount_usd": 129.0,
+        "status": "OPEN",
+        "fallback_reason": null,
+        "cost_usd": 0.0008592,
+        "latency_ms": 6206.022
+      },
+      "trace": {
+        "model_calls": [
+          {
+            "model": "qwen/qwen3.8-27b",
+            "input_tokens": 0,
+            "output_tokens": 0
+          },
+          {
+            "model": "qwen/qwen3.8-27b",
+            "input_tokens": 0,
+            "output_tokens": 0
+          },
+          {
+            "model": "qwen/qwen3.8-27b",
+            "input_tokens": 634,
+            "output_tokens": 88
+          }
+        ],
+        "tools_called": [
+          "lookup_customer",
+          "lookup_order",
+          "lookup_shipment",
+          "lookup_order_items",
+          "lookup_refunds",
+          "llm_extract"
+        ],
+        "documents_used": [
+          {
+            "document": "RP-3.2",
+            "version": "3.2"
+          }
+        ],
+        "cost_usd": 0.0008592
+      },
+      "primary_match": true,
+      "reason_codes_match": true,
+      "amount_match": true,
+      "passed": true
+    },
+    {
+      "case_id": "NEG-DAY40-NO-PHOTO",
+      "ticket_id": "NEG-DAY40",
+      "description": "damaged item on day 40 with no photo",
+      "expected": {
+        "outcome": "REJECT",
+        "human_approval_required": false,
+        "approver_role": null,
+        "reason_codes": [
+          "OUT_OF_WINDOW"
+        ]
+      },
+      "assertions": [],
+      "actual": {
+        "outcome": "REJECT",
+        "human_approval_required": false,
+        "approver_role": null,
+        "reason_codes": [
+          "OUT_OF_WINDOW"
+        ],
+        "amount_usd": null,
+        "status": "CLOSED",
+        "fallback_reason": null,
+        "cost_usd": 0.0009632,
+        "latency_ms": 2994.181
+      },
+      "trace": {
+        "model_calls": [
+          {
+            "model": "qwen/qwen3.8-27b",
+            "input_tokens": 0,
+            "output_tokens": 0
+          },
+          {
+            "model": "qwen/qwen3.8-27b",
+            "input_tokens": 644,
+            "output_tokens": 112
+          }
+        ],
+        "tools_called": [
+          "lookup_customer",
+          "lookup_order",
+          "lookup_shipment",
+          "lookup_order_items",
+          "lookup_refunds",
+          "llm_extract"
+        ],
+        "documents_used": [
+          {
+            "document": "RP-3.2",
+            "version": "3.2"
+          }
+        ],
+        "cost_usd": 0.0009632
+      },
+      "primary_match": true,
+      "reason_codes_match": true,
+      "amount_match": null,
+      "passed": true
+    },
+    {
+      "case_id": "NEG-DOUBLE-APPROVE",
+      "ticket_id": "NEG-DOUBLE-APPROVE",
+      "description": "double approve on a PEND run leaves exactly one APPROVED ledger row",
+      "expected": {
+        "outcome": "PEND",
+        "human_approval_required": true,
+        "approver_role": "SUPPORT_LEAD",
+        "reason_codes": [
+          "APPROVAL_REQUIRED"
+        ],
+        "amount_usd": 210.0
+      },
+      "assertions": [
+        {
+          "name": "first_approve_200",
+          "passed": true,
+          "detail": "status=200"
+        },
+        {
+          "name": "second_approve_200_unchanged",
+          "passed": true,
+          "detail": "status=200"
+        },
+        {
+          "name": "run_approved_and_human_cleared",
+          "passed": true,
+          "detail": "status=APPROVED, human=False"
+        },
+        {
+          "name": "exactly_one_approved_ledger_row",
+          "passed": true,
+          "detail": "1 approved row(s)"
+        }
+      ],
+      "actual": {
+        "outcome": "PEND",
+        "human_approval_required": true,
+        "approver_role": "SUPPORT_LEAD",
+        "reason_codes": [
+          "APPROVAL_REQUIRED"
+        ],
+        "amount_usd": 210.0,
+        "status": "AWAITING_APPROVAL",
+        "fallback_reason": null,
+        "cost_usd": 0.000968,
+        "latency_ms": 8300.315
+      },
+      "trace": {
+        "model_calls": [
+          {
+            "model": "qwen/qwen3.8-27b",
+            "input_tokens": 0,
+            "output_tokens": 0
+          },
+          {
+            "model": "qwen/qwen3.8-27b",
+            "input_tokens": 645,
+            "output_tokens": 113
+          }
+        ],
+        "tools_called": [
+          "lookup_customer",
+          "lookup_order",
+          "lookup_shipment",
+          "lookup_order_items",
+          "lookup_refunds",
+          "llm_extract"
+        ],
+        "documents_used": [
+          {
+            "document": "RP-3.2",
+            "version": "3.2"
+          }
+        ],
+        "cost_usd": 0.000968
+      },
+      "primary_match": true,
+      "reason_codes_match": true,
+      "amount_match": true,
+      "passed": true
+    }
+  ]
+}
