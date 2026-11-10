@@ -46,3 +46,27 @@ pip install -r requirements.txt
 ├── requirements.txt
 └── README.md
 ```
+
+## Support service
+
+Build the data store, then start the API (port comes from `PORT`, default `8000`):
+
+```bash
+python -m src.prepare
+PORT=8000 python -m src.main
+```
+
+Endpoints: `GET /health`, `POST /tickets`, `GET /runs/{run_id}`,
+`POST /runs/{run_id}/decision`, `GET /ledger`.
+
+`POST /tickets` returns the contract `TicketResponse`. Stored runs add:
+
+| Field | Meaning |
+|---|---|
+| `status` | `OPEN`, `AWAITING_APPROVAL`, `APPROVED`, `REJECTED`, or `CLOSED` |
+| `decision` | `{decision, approver, decided_at}`, or `null` before a PEND decision |
+| `amount_usd` | Proposed refund amount, or `null` for reply/escalation outcomes |
+| `latency_ms` | Time taken to process the ticket |
+
+Runs and the ledger live in `build/runtime.db`; cleaned source tables live in
+`build/larkfield.db`. Both are regenerated locally and ignored by git.
