@@ -38,6 +38,7 @@
   <ul>
     <li><strong>Before</strong> (<code>evals/results/results_20261110T135537Z.json</code>): 20/21 passed (95.24%). <code>NEG-DUP-T002</code> failed: it returned <code>PROCEED</code> instead of <code>REJECT</code>/<code>ALREADY_REFUNDED</code>; the ledger assertion already showed exactly one refund row.</li>
     <li><strong>After</strong> (<code>evals/results/results_20261110T140115Z.json</code>): 21/21 passed (100%). O12 now fingerprints normalised sender, order, affected line numbers and action. A matching PROPOSED/APPROVED REFUND makes <code>CHK_PROCESS_ONCE</code> fail, returns <code>REJECT</code>/<code>ALREADY_REFUNDED</code>, records ledger <code>REPLY</code>, and the reply references the earlier run. Reason-code matches: 8/8; amount matches: 4/4.</li>
+    <li><strong>Live deployed run</strong> (<code>evals/results/results_20261110T141715Z.json</code>): 21/21 passed (100%), median cost $0.000968, median latency 463.030 ms.</li>
     <li>Cases: <a href="evals/cases.json">evals/cases.json</a>; runner and pass rule: <a href="evals/run_eval.py">evals/run_eval.py</a>.</li>
   </ul>
 

@@ -49,6 +49,8 @@ Only the ten policy reason codes are emitted. The engine is in [src/rules.py](sr
   matching PROPOSED/APPROVED REFUND makes `CHK_PROCESS_ONCE` fail, returns
   `REJECT`/`ALREADY_REFUNDED`, records ledger `REPLY`, and the reply references the earlier
   run. Reason-code matches: 8/8; amount matches: 4/4.
+- **Live deployed run** (`evals/results/results_20261110T141715Z.json`): 21/21 passed
+  (100%), median cost $0.000968, median latency 463.030 ms.
 - Cases: [evals/cases.json](evals/cases.json); runner and pass rule:
   [evals/run_eval.py](evals/run_eval.py).
 
